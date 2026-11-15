@@ -1,6 +1,7 @@
 # NASA Space Apps 2026 - "Dancing with SARs" (NISAR): Tonle Sap flood pulse
 
-Team: Afk + teammates. Challenge: build an interactive, open-source app/report/story that uses NISAR radar data
+Team: CODEV - Alpha (UAE): Abdul Bari Mohammed Abdul Kaleem (owner), Abdurahman Khan (Afk), Sajid Ali,
+Bashaer Abdulla Aljneibi. Live: Vercel (root dir site/), repo github.com/afk-2/tonle-sap-invisible-flood. Challenge: build an interactive, open-source app/report/story that uses NISAR radar data
 to track and visualize surface change over time and hypothesize the physical drivers.
 Afk is a data scientist with no radar background: explain radar choices briefly, in plain words.
 

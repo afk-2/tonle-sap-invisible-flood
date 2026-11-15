@@ -212,6 +212,12 @@ details.tech p { font-size: 12.5px !important; color: var(--ink-3) !important; }
 .card hr { border: 0; border-top: 1px solid var(--line); margin: 18px 0 12px; }
 .about-h { font-family: var(--serif); font-size: 20px; margin: 0 0 8px; }
 .small { font-size: 12.5px !important; color: var(--ink-3) !important; }
+.team { list-style: none; padding: 0; margin: 0 0 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px;
+        font-size: 13.5px; color: var(--ink); }
+.team li { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.04); }
+.team .role { display: inline-block; margin-left: 4px; font-size: 10.5px; font-weight: 600; color: #111; background: var(--gold);
+              border-radius: 4px; padding: 0 5px; vertical-align: 1px; }
+@media (max-width: 860px) { .team { grid-template-columns: 1fr; } }
 
 /* explore dock */
 body:not(.exploring) .maplibregl-ctrl-group { display: none; }     /* no zoom buttons during the story */
