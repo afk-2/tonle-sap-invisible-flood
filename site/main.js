@@ -38,7 +38,7 @@ const BASEMAP = {
 };
 
 const S = { dates: [], keys: [], rows: [], corners: null, scale: null, W: 0, H: 0, layers: null,
-            layer: "flood", idx: 0, opacity: 0.9, compare: false, left: 0, right: 0, timer: null, divX: 0.5,
+            layer: "flood", idx: 0, opacity: 0.82, compare: false, left: 0, right: 0, timer: null, divX: 0.5,
             step: null, exploring: false, pixels: null, wc: null };
 const el = id => document.getElementById(id);
 const fmt = (iso, long) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB",
@@ -57,16 +57,19 @@ async function loadData() {
   S.corners = bj.maplibre_image_coordinates_lonlat;
   S.W = bj.width; S.H = bj.height;
   S.layers = lj;
+  S.dispCorners = lj.display40.corners;
   const lines = csv.trim().split(/\r?\n/), head = lines[0].split(","), byDate = {};
   for (const ln of lines.slice(1)) { const v = ln.split(","), r = {}; head.forEach((h, i) => { r[h] = v[i]; }); byDate[r.date] = r; }
   S.rows = S.dates.map(d => byDate[d.date]);
 }
 
+// display layers are the sharp 40 m versions (numbers and click-to-inspect use the exact 100 m data)
 function layerUrl(layer, i) {
-  if (layer === "timecolor") return "data/timecolor.png";
-  if (layer === "duration") return "data/duration.png";
-  const pre = { flood: "flood_", radar: "radar_", grey: "hh_" }[layer];
-  return `data/${pre}${S.keys[i]}.png`;
+  if (layer === "timecolor") return "data/timecolor40.webp";
+  if (layer === "duration") return "data/duration40.png";
+  if (layer === "flood") return `data/flood40_${S.keys[i]}.png`;
+  if (layer === "radar") return `data/radar40_${S.keys[i]}.webp`;
+  return `data/hh40_${S.keys[i]}.webp`;
 }
 
 function preloadLayer(layer) {
@@ -82,14 +85,22 @@ const bounds = () => {
   return [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]];
 };
 
+// the camera can never leave the study area (about 1.5 window-widths around it) or zoom out to the region
+function maxBounds() {
+  // generous margins: framing the image beside a text card needs the camera to look well past its edges
+  const [[w, s], [e, n]] = bounds(), dx = (e - w) * 3, dy = (n - s) * 2;
+  return [[w - dx, s - dy], [e + dx, n + dy]];
+}
+
 function makeMap(id) {
   const m = new maplibregl.Map({
     container: id, style: BASEMAP, attributionControl: false, dragRotate: false, pitchWithRotate: false,
     bounds: bounds(), fitBoundsOptions: { padding: framePadding() }, fadeDuration: 0,
+    maxBounds: maxBounds(), minZoom: 8.5, maxZoom: 15,
   });
   m.touchZoomRotate.disableRotation();
   ready[id] = new Promise(res => m.on("load", () => {
-    m.addSource("ov", { type: "image", url: layerUrl("flood", 0), coordinates: S.corners });
+    m.addSource("ov", { type: "image", url: layerUrl("flood", 0), coordinates: S.dispCorners });
     m.addLayer({ id: "ov", type: "raster", source: "ov",
                  paint: { "raster-opacity": S.opacity, "raster-fade-duration": 0, "raster-resampling": "nearest" } });
     res(m);
@@ -110,7 +121,7 @@ function m_touchNoRotate() { mapA.touchZoomRotate.disableRotation(); mapB.touchZ
 
 async function showImage(mapId, layer, i) {
   const m = await ready[mapId];
-  m.getSource("ov").updateImage({ url: layerUrl(layer, i), coordinates: S.corners });
+  m.getSource("ov").updateImage({ url: layerUrl(layer, i), coordinates: S.dispCorners });
 }
 
 function setOpacity(v) {
@@ -132,14 +143,30 @@ function syncMaps(a, b) {
 
 // leave room for the story card on the left (desktop) or the card at the bottom (mobile)
 function framePadding() {
-  if (S.exploring) return isMobile() ? { top: 60, bottom: 120, left: 10, right: 10 } : { top: 40, bottom: 110, left: 520, right: 60 };
-  return isMobile() ? { top: 90, bottom: Math.round(window.innerHeight * 0.2), left: 10, right: 10 }
-                    : { top: 60, bottom: 60, left: Math.min(560, window.innerWidth * 0.42), right: 80 };
+  const W = window.innerWidth, H = window.innerHeight;
+  let p;
+  if (S.exploring) {
+    // keep the image clear of the explore card (left) and the control dock (bottom), measured live
+    const dockH = el("dock").offsetHeight || 150;
+    const card = document.querySelector("#explore .card");
+    const cardR = card && !isMobile() ? Math.min(card.getBoundingClientRect().right, W * 0.45) : 0;
+    p = isMobile() ? { top: 60, bottom: dockH + 16, left: 10, right: 10 }
+                   : { top: 50, bottom: dockH + 30, left: cardR + 24, right: 60 };
+  } else if (S.step && S.step.classList.contains("hero")) {
+    p = isMobile() ? { top: 90, bottom: Math.round(H * 0.2), left: 10, right: 10 }
+                   : { top: 50, bottom: 50, left: W * 0.5, right: 70 };
+  } else p = isMobile() ? { top: 90, bottom: Math.round(H * 0.2), left: 10, right: 10 }
+                        : { top: 60, bottom: 60, left: Math.min(560, W * 0.42), right: 80 };
+  // never let the padding eat the map: keep at least 35% of the width and height for the image
+  const sx = Math.min(1, (W * 0.65) / (p.left + p.right)), sy = Math.min(1, (H * 0.65) / (p.top + p.bottom));
+  return { top: p.top * sy, bottom: p.bottom * sy, left: p.left * sx, right: p.right * sx };
 }
 
-function flyToView(view) {
+let currentView = "full";
+function flyToView(view, instant) {
   if (!mapA) return;
-  const opts = { duration: reducedMotion ? 0 : 2200, essential: true };
+  currentView = view || "full";
+  const opts = { duration: reducedMotion || instant ? 0 : 2200, essential: true };
   if (!view || view === "full") {
     mapA.fitBounds(bounds(), { ...opts, padding: framePadding() });
   } else {
@@ -540,7 +567,14 @@ function initSteps() {
   };
   let ticking = false;
   window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; check(); }); } }, { passive: true });
-  window.addEventListener("resize", () => { check(); });
+  // re-frame the current view whenever the window size changes (otherwise a page opened in a small window
+  // and then maximised keeps a far-out zoom)
+  let rt = null;
+  window.addEventListener("resize", () => {
+    check();
+    clearTimeout(rt);
+    rt = setTimeout(() => { if (!S.exploring) flyToView(currentView, true); }, 250);
+  });
   return check;
 }
 
@@ -551,6 +585,10 @@ function initControls() {
   el("play").addEventListener("click", () => (S.timer ? stop() : play()));
   el("opacity").addEventListener("input", e => setOpacity(+e.target.value));
   document.querySelectorAll(".d-seg").forEach(b => b.addEventListener("click", () => setLayer(b.dataset.layer)));
+  el("resetBtn").addEventListener("click", () => {
+    if (popup) popup.remove();
+    mapA.fitBounds(bounds(), { padding: framePadding(), duration: reducedMotion ? 0 : 900 });
+  });
   el("compareBtn").addEventListener("click", () => {
     if (S.compare) setCompare(false);
     else { S.divX = 0.5; setCompare(true, indexOfDate("2026-06-19"), indexOfDate("2026-08-30")); }
@@ -584,6 +622,7 @@ function initControls() {
   mapA.on("click", e => inspect(e.lngLat));
   syncMaps(mapA, mapB);
   setInteractive(false);
+  ready.mapA.then(() => { mapA.resize(); mapB.resize(); flyToView(currentView, true); });
   buildProgress(); initDivider(); initControls(); initCharts();
   preloadLayer("flood");
   setDate(0); renderLegend();

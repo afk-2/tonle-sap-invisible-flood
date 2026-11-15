@@ -89,3 +89,15 @@ and storytelling. Log decisions below.
   hero, explore + inspect and phone (400 px) in a real Edge window instead; chapters 1, 4-6, 8 headless. Shadows
   reduced and card backdrop blur removed for slow phones. Test hooks: ?ch=N|top|explore, &solo=1, &noplay=1,
   &noscroll=1, &noshadow=1, &inspect=lng,lat.
+- 2026-11-15: Site v3.1 (user: "too zoomed out, should be clearer, explore confusing"). User saw the map at region
+  zoom (~5), probably a first layout at another window size with no refit. Fixes: minZoom 8.5, maxBounds = image
+  +-3x width / 2x height (tighter maxBounds clamped the side-padded framing!), refit on window resize and after
+  map load, padding capped at 65% of the screen, hero frames the image in the right half, explore framing measures
+  the card and dock. Sharper DISPLAY layers at 40 m (webcolor): 5x5 boxcar at 20 m sampled every 40 m ->
+  flood40_<d>.png, radar40_/hh40_<d>.webp, timecolor40.webp, duration40.png, corners in layers.json display40.
+  Numbers + click-to-inspect still use the 100 m data. site step no longer copies the 100 m display layers.
+  Explore dock simplified: big play, labelled Date/Show rows, "Compare two dates", "Reset view", one-line hint;
+  zoom buttons hidden during the story. Verified hero framing in real Edge; explore framing not re-verified
+  (headless hangs; real-window capture would grab the user's screen while they work).
+- 2026-11-15: User: "plain square looks weird". 40 m display layers now feathered (feather(): alpha smoothstep over
+  the outer 9% of the image) and default layer opacity 0.82. Data layers for numbers/inspect unchanged.

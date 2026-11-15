@@ -327,21 +327,29 @@
 
 <!-- ========================== explore dock ========================== -->
 <div class="dock" id="dock" hidden>
-  <button id="play" class="d-btn" aria-label="Play">▶</button>
-  <div class="d-date">
-    <input id="slider" type="range" min="0" max="10" step="1" value="0" aria-label="Date">
-    <span id="sliderLabel">19 Jun 2026</span>
+  <div class="d-row">
+    <button id="play" class="d-btn d-play" aria-label="Play the season">▶</button>
+    <div class="d-date">
+      <span class="d-lab">Date</span>
+      <input id="slider" type="range" min="0" max="10" step="1" value="0" aria-label="Date">
+      <span id="sliderLabel">19 Jun 2026</span>
+    </div>
   </div>
-  <div class="d-layers" role="group" aria-label="Map layer">
-    <button class="d-seg" data-layer="flood" aria-pressed="true">Flood map</button>
-    <button class="d-seg" data-layer="radar" aria-pressed="false">Radar colour</button>
-    <button class="d-seg" data-layer="grey" aria-pressed="false">Radar grey</button>
+  <div class="d-row">
+    <span class="d-lab">Show</span>
+    <div class="d-layers" role="group" aria-label="Map layer">
+      <button class="d-seg" data-layer="flood" aria-pressed="true">Flood map</button>
+      <button class="d-seg" data-layer="radar" aria-pressed="false">Radar colour</button>
+      <button class="d-seg" data-layer="grey" aria-pressed="false">Radar brightness</button>
+    </div>
+    <button id="compareBtn" class="d-btn d-text" aria-pressed="false">⇆ Compare two dates</button>
+    <div class="d-cmp" id="cmpSelects" hidden>
+      <select id="selL" aria-label="Left date"></select><span>vs</span><select id="selR" aria-label="Right date"></select>
+    </div>
+    <label class="d-op" title="See the map underneath"><span aria-hidden="true">◐</span><input id="opacity" type="range" min="0" max="1" step="0.05" value="0.82" aria-label="See-through"></label>
+    <button id="resetBtn" class="d-btn d-text" title="Back to the whole area">⟲ Reset view</button>
   </div>
-  <label class="d-op" title="See-through"><span aria-hidden="true">◐</span><input id="opacity" type="range" min="0" max="1" step="0.05" value="0.9" aria-label="Layer opacity"></label>
-  <button id="compareBtn" class="d-btn d-text" aria-pressed="false">Swipe</button>
-  <div class="d-cmp" id="cmpSelects" hidden>
-    <select id="selL" aria-label="Left date"></select><span>vs</span><select id="selR" aria-label="Right date"></select>
-  </div>
+  <p class="d-hint">Drag to move · <span class="hint-desk">Ctrl + scroll</span><span class="hint-touch">two fingers</span> to zoom · <b>click a spot</b> to see its season</p>
 </div>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>

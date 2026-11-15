@@ -47,5 +47,29 @@
    ]
   }
  },
- "radar_rgb": "R = HH (-20..0 dB), G = HV (-28..-8 dB), B = HH-HV (2..14 dB)"
+ "radar_rgb": "R = HH (-17.9..-2.7 dB), G = HV (-24.2..-9.1 dB), B = HH-HV (3.9..9.9 dB)",
+ "display40": {
+  "corners": [
+   [
+    103.547593,
+    13.400064
+   ],
+   [
+    103.949844,
+    13.402058
+   ],
+   [
+    103.951559,
+    13.000273
+   ],
+   [
+    103.549965,
+    12.998342
+   ]
+  ],
+  "width": 1089,
+  "height": 1111,
+  "pixel_m": 40,
+  "note": "flood40_<date>.png, radar40_/hh40_<date>.webp, timecolor40.webp, duration40.png: 5x5 boxcar at 20 m (~100 m averaging) sampled every 40 m, display only; numbers (series.csv, classes.csv, click-to-inspect) use the 100 m layers"
+ }
 }

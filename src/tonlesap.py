@@ -683,6 +683,20 @@ FLOOD_COLORS = {          # class code: (name, RGB) - the web app's flood map
 }
 
 
+def feather(rgba, frac=0.09):
+    """Soft edges for web display layers: alpha fades to 0 over the outer `frac` of the image (smoothstep),
+    so the radar image blends into the basemap instead of ending in a hard square."""
+    h, w = rgba.shape[:2]
+    r = max(2, int(frac * min(h, w)))
+    def ramp(n):
+        t = np.clip(np.minimum(np.arange(n), np.arange(n)[::-1]) / r, 0, 1)
+        return t * t * (3 - 2 * t)
+    m = np.outer(ramp(h), ramp(w))
+    out = rgba.copy()
+    out[..., 3] = np.round(out[..., 3] * m).astype(np.uint8)
+    return out
+
+
 def webcolor():
     """Colour web layers per date (100 m): flood_<d>.png (meaning-coloured classes), radar_<d>.png
     (NISAR colour composite R=HH, G=HV, B=HH/HV ratio), plus duration.png (how many 12-day images each cell
@@ -700,6 +714,13 @@ def webcolor():
     for k, (_, rgb) in FLOOD_COLORS.items():
         lut[k] = (*rgb, 255)
     rows, wet_count, n_prov, perm = [], None, 0, None
+    from scipy.ndimage import uniform_filter
+    R40, C40 = yr.size // 2, xr.size // 2                   # 40 m grid, same top-left corner as the 100 m grid
+    tree40 = built40 = wet40 = perm40 = None
+    hh40 = {}
+
+    def st(a, lo, hi):
+        return np.round(255 * np.clip((a - lo) / (hi - lo), 0, 1)).astype(np.uint8)
     for d in ds:
         with np.load(f"{CACHE}/{d}.npz") as z:
             hh, hv, mk = align(dict(z), xr, yr)
@@ -719,9 +740,6 @@ def webcolor():
         cls[ff] = 2
         cls[water] = 1
         Image.fromarray(lut[cls], "RGBA").save(f"{WEB}/flood_{d}.png", optimize=True)
-        # radar colour composite
-        def st(a, lo, hi):
-            return np.round(255 * np.clip((a - lo) / (hi - lo), 0, 1)).astype(np.uint8)
         # stretch = 2-98th percentile of land cells over all dates (fixed, so dates are comparable)
         rgb = np.dstack([st(HH, -17.9, -2.7), st(HV, -24.2, -9.1), st(HH - HV, 3.9, 9.9), (valid * 255).astype(np.uint8)])
         rgb[~valid] = 0
@@ -734,6 +752,32 @@ def webcolor():
             wet_count = w if wet_count is None else wet_count + w
             perm = water if perm is None else perm & water
             n_prov += 1
+        # ---- sharper DISPLAY layers at 40 m: 5x5 boxcar at 20 m (same ~100 m speckle averaging), sampled every 40 m
+        if tree40 is None:
+            tf = uniform_filter((wc == 10).astype("float32"), 5)
+            bf = uniform_filter((wc == 50).astype("float32"), 5)
+            tree40 = blockmean(tf[:R40 * 2, :C40 * 2], 2) >= 0.5
+            built40 = blockmean(bf[:R40 * 2, :C40 * 2], 2) >= 0.5
+        sm = lambda a: blockmean(boxcar(a, ok, 5)[:R40 * 2, :C40 * 2], 2)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            H4, V4 = dbv(sm(hh)), dbv(sm(hv))
+        v4 = np.isfinite(H4) & (blockmean(ok[:R40 * 2, :C40 * 2].astype("float32"), 2) >= 0.5)
+        H4[~v4] = np.nan; V4[~v4] = np.nan
+        c4 = np.zeros(H4.shape, np.uint8)
+        w4 = v4 & (H4 < DARK)
+        c4[v4] = 4; c4[v4 & tree40] = 3; c4[v4 & built40 & ~tree40] = 5
+        c4[v4 & tree40 & ~w4 & (H4 >= -5)] = 2; c4[w4] = 1
+        Image.fromarray(feather(lut[c4]), "RGBA").save(f"{WEB}/flood40_{d}.png", optimize=True)
+        r4 = np.dstack([st(H4, -17.9, -2.7), st(V4, -24.2, -9.1), st(H4 - V4, 3.9, 9.9), (v4 * 255).astype(np.uint8)])
+        r4[~v4] = 0
+        Image.fromarray(feather(r4), "RGBA").save(f"{WEB}/radar40_{d}.webp", quality=80, method=6)
+        g4 = st(H4, -22, 2)
+        Image.fromarray(feather(np.dstack([g4, g4, g4, (v4 * 255).astype(np.uint8)])), "RGBA").save(f"{WEB}/hh40_{d}.webp", quality=80, method=6)
+        hh40[d] = H4
+        if not d.startswith("V"):
+            w = (w4 | (c4 == 2)).astype(np.uint8)
+            wet40 = w if wet40 is None else wet40 + w
+            perm40 = w4 if perm40 is None else perm40 & w4
     with open(f"{WEB}/classes.csv", "w", newline="") as f:
         wr = csv.DictWriter(f, fieldnames=list(rows[0]))
         wr.writeheader(); wr.writerows(rows)
@@ -758,13 +802,37 @@ def webcolor():
     out[(wet_count == n_prov) & ~perm] = (*seq[-1].astype(int), 235)
     out[perm] = (47, 143, 232, 255)
     Image.fromarray(out, "RGBA").save(f"{WEB}/duration.png", optimize=True)
+
+    # ---- 40 m display versions of the time-colour and duration layers + their exact corners
+    tc4 = np.dstack([st2(hh40["20260830"]), st2(hh40["20260619"]), st2(hh40["20261017"]),
+                     (np.isfinite(hh40["20260619"]) * 255).astype(np.uint8)])
+    Image.fromarray(feather(tc4), "RGBA").save(f"{WEB}/timecolor40.webp", quality=82, method=6)
+    wet40 = median_filter(wet40, 3)
+    o4 = np.zeros(wet40.shape + (4,), np.uint8)
+    for k in range(1, n_prov):
+        t = (k - 1) / max(1, n_prov - 2) * (len(seq) - 1)
+        i0 = int(np.floor(t)); i1 = min(i0 + 1, len(seq) - 1)
+        c = seq[i0] + (seq[i1] - seq[i0]) * (t - i0)
+        o4[(wet40 == k) & ~perm40] = (*np.round(c).astype(int), 235)
+    o4[(wet40 == n_prov) & ~perm40] = (*seq[-1].astype(int), 235)
+    o4[perm40] = (47, 143, 232, 255)
+    Image.fromarray(feather(o4), "RGBA").save(f"{WEB}/duration40.png", optimize=True)
+    from pyproj import Transformer
+    tr = Transformer.from_crs(EPSG, 4326, always_xy=True).transform
+    x0, y1 = xr[0] - 10, yr[0] + 10
+    x1, y0 = x0 + C40 * 40, y1 - R40 * 40
+    corners40 = [[round(a, 6), round(b, 6)] for a, b in (tr(x0, y1), tr(x1, y1), tr(x1, y0), tr(x0, y0))]
     stats = dict(n_images=n_prov, permanent_water_km2=round(float(perm.sum() * cell_km2), 1),
                  ever_wet_not_permanent_km2=round(float(((wet_count > 0) & ~perm).sum() * cell_km2), 1),
                  wet_ge_half_km2=round(float(((wet_count >= n_prov / 2) & ~perm).sum() * cell_km2), 1),
                  tree_ever_flooded_forest_km2=round(float((tree & (wet_count > 0) & ~perm).sum() * cell_km2), 1),
                  tree_km2=round(float(tree.sum() * cell_km2), 1),
                  classes={str(k): dict(name=v[0], rgb=v[1]) for k, v in FLOOD_COLORS.items()},
-                 radar_rgb="R = HH (-20..0 dB), G = HV (-28..-8 dB), B = HH-HV (2..14 dB)")
+                 radar_rgb="R = HH (-17.9..-2.7 dB), G = HV (-24.2..-9.1 dB), B = HH-HV (3.9..9.9 dB)",
+                 display40=dict(corners=corners40, width=int(C40), height=int(R40), pixel_m=40,
+                                note="flood40_<date>.png, radar40_/hh40_<date>.webp, timecolor40.webp, duration40.png: "
+                                     "5x5 boxcar at 20 m (~100 m averaging) sampled every 40 m, display only; "
+                                     "numbers (series.csv, classes.csv, click-to-inspect) use the 100 m layers"))
     json.dump(stats, open(f"{WEB}/layers.json", "w"), indent=1)
     print(json.dumps(stats, indent=1))
     for r in rows:
@@ -778,8 +846,14 @@ def site():
     dst, img = os.path.join(ROOT, "site", "data"), os.path.join(ROOT, "site", "img")
     os.makedirs(dst, exist_ok=True); os.makedirs(img, exist_ok=True)
     from PIL import Image
+    skip = ("flood_", "radar_", "timecolor.png", "duration.png")    # 100 m display layers: the site uses the 40 m ones
+    for old in glob.glob(os.path.join(dst, "*")):
+        if os.path.basename(old).startswith(skip):
+            os.remove(old)
     for f in glob.glob(os.path.join(WEB, "*")):
         name = os.path.basename(f)
+        if name.startswith(skip):
+            continue
         if name.startswith("cmp_"):                    # comparison panels: shrink for the web
             im = Image.open(f)
             im.thumbnail((720, 720))
