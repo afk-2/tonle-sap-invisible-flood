@@ -1,0 +1,79 @@
+{
+ "dates": [
+  {
+   "date": "2026-06-19",
+   "file": "hh_20260619.png",
+   "validated": false,
+   "note": ""
+  },
+  {
+   "date": "2026-07-01",
+   "file": "hh_20260701.png",
+   "validated": false,
+   "note": ""
+  },
+  {
+   "date": "2026-07-13",
+   "file": "hh_20260713.png",
+   "validated": false,
+   "note": ""
+  },
+  {
+   "date": "2026-07-25",
+   "file": "hh_20260725.png",
+   "validated": false,
+   "note": ""
+  },
+  {
+   "date": "2026-08-18",
+   "file": "hh_20260818.png",
+   "validated": false,
+   "note": ""
+  },
+  {
+   "date": "2026-08-30",
+   "file": "hh_20260830.png",
+   "validated": false,
+   "note": ""
+  },
+  {
+   "date": "2026-09-11",
+   "file": "hh_20260911.png",
+   "validated": false,
+   "note": ""
+  },
+  {
+   "date": "2026-09-23",
+   "file": "hh_20260923.png",
+   "validated": false,
+   "note": ""
+  },
+  {
+   "date": "2026-10-05",
+   "file": "hh_20261005.png",
+   "validated": false,
+   "note": ""
+  },
+  {
+   "date": "2026-10-17",
+   "file": "hh_20261017.png",
+   "validated": false,
+   "note": ""
+  },
+  {
+   "date": "2026-10-29",
+   "file": "hh_V20261029.png",
+   "validated": true,
+   "note": "validated product (different processing version)"
+  }
+ ],
+ "colour_scale": {
+  "band": "HH",
+  "unit": "dB",
+  "min": -22.0,
+  "max": 2.0,
+  "colormap": "gray",
+  "transparent": "no data",
+  "decode": "dB = min + R/255 * (max - min); R = 0 means <= min, R = 255 means >= max"
+ }
+}

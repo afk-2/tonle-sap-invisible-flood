@@ -1,6 +1,6 @@
 # large or regenerated data
-data/
-outputs/logs/
+/data/
+/outputs/logs/
 *.npz
 *.npy
 

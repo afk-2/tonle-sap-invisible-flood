@@ -5,7 +5,7 @@
 
 const CONFIG = {
   repoName: "tonle-sap-invisible-flood",
-  githubUser: "YOUR-GITHUB-USERNAME",   // auto-detected when served from <user>.github.io
+  githubUser: "afk-2",                  // auto-detected when served from <user>.github.io
   branch: "main",
 };
 
