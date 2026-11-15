@@ -1,0 +1,31 @@
+{
+ "epsg": 32648,
+ "utm_bounds": {
+  "left": 342740.0,
+  "bottom": 1437440.0,
+  "right": 386240.0,
+  "top": 1481840.0
+ },
+ "pixel_m": 100,
+ "width": 435,
+ "height": 444,
+ "maplibre_image_coordinates_lonlat": [
+  [
+   103.547593,
+   13.400064
+  ],
+  [
+   103.94929,
+   13.402055
+  ],
+  [
+   103.951004,
+   13.000633
+  ],
+  [
+   103.549963,
+   12.998703
+  ]
+ ],
+ "note": "corners in order top-left, top-right, bottom-right, bottom-left (MapLibre image source). Image is north-up in UTM 48N, so it is very slightly rotated in lon/lat."
+}

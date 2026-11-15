@@ -1,0 +1,51 @@
+{
+ "n_images": 10,
+ "permanent_water_km2": 570.4,
+ "ever_wet_not_permanent_km2": 963.6,
+ "wet_ge_half_km2": 374.8,
+ "tree_ever_flooded_forest_km2": 452.0,
+ "tree_km2": 540.5,
+ "classes": {
+  "1": {
+   "name": "open water",
+   "rgb": [
+    47,
+    143,
+    232
+   ]
+  },
+  "2": {
+   "name": "flooded forest",
+   "rgb": [
+    62,
+    230,
+    160
+   ]
+  },
+  "3": {
+   "name": "forest, no flood seen",
+   "rgb": [
+    24,
+    92,
+    56
+   ]
+  },
+  "4": {
+   "name": "fields, grass, wetland",
+   "rgb": [
+    184,
+    160,
+    118
+   ]
+  },
+  "5": {
+   "name": "built-up",
+   "rgb": [
+    150,
+    150,
+    150
+   ]
+  }
+ },
+ "radar_rgb": "R = HH (-20..0 dB), G = HV (-28..-8 dB), B = HH-HV (2..14 dB)"
+}

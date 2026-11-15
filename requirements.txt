@@ -1,0 +1,11 @@
+earthaccess
+h5py
+numpy
+scipy
+pyproj
+matplotlib
+affine
+odc-stac
+odc-geo
+pystac-client
+planetary-computer

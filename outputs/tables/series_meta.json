@@ -1,0 +1,7 @@
+{
+ "tree_km2": 540.5,
+ "crop_km2": 249.8,
+ "wetland_km2": 410.9,
+ "cell_m": 100,
+ "class_rule": "WorldCover 2021 class covers >= 50% of the 100 m cell"
+}

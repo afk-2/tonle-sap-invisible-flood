@@ -1,0 +1,16 @@
+# large or regenerated data
+data/
+outputs/logs/
+*.npz
+*.npy
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# credentials / local config (never commit)
+.netrc
+_netrc
+.dodsrc
+.urs_cookies

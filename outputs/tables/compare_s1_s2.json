@@ -1,0 +1,43 @@
+{
+ "nisar_date": "2026-08-30",
+ "search_window": "2026-08-20/2026-09-09",
+ "s1_items": 11,
+ "s1_date": "2026-08-30",
+ "s1_platform": [
+  "sentinel-1c"
+ ],
+ "s1_orbit": [
+  "ascending"
+ ],
+ "s1_valid_frac": 0.74,
+ "s2_items": 6,
+ "s2_date": "2026-08-27",
+ "s2_window_cloud_pct": 52,
+ "s2_tile_cloud_pct": 23,
+ "s2_window_coverage_pct": 100,
+ "ring_km2_40m": 308.9,
+ "nisar_HH_ring_vs_other_tree_dB": [
+  -3.7,
+  -6.72
+ ],
+ "s1_VV_ring_vs_other_tree_dB": [
+  -5.97,
+  -7.27
+ ],
+ "corr_tree_VV_vs_HH": 0.64,
+ "ring_from_2026-08-18": {
+  "km2": 288.6,
+  "nisar_HH_ring_vs_other_dB": [
+   -4.27,
+   -6.57
+  ],
+  "s1_VV_ring_vs_other_dB": [
+   -6.23,
+   -7.01
+  ],
+  "s1_VH_ring_vs_other_dB": [
+   -11.61,
+   -12.56
+  ]
+ }
+}

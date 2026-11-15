@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>The Invisible Flood: Tonle Sap</title>
+  <meta name="description" content="Cambodia's great lake floods into its forest every year, hidden under clouds and leaves. NISAR's radar lets us watch it happen, June to October 2026.">
+  <meta name="theme-color" content="#0a0f16">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ========================== full-screen map (fixed, behind the story) ========================== -->
+<div class="stage" id="stage" aria-label="Map of the Tonle Sap study area">
+  <div id="mapA" class="map"></div>
+  <div id="mapB" class="map" aria-hidden="true"></div>
+  <div id="divider" class="divider" hidden><button class="handle" aria-label="Drag to compare dates">⟷</button></div>
+  <div class="tag tag-left" id="tagL" hidden></div>
+  <div class="tag tag-right" id="tagR" hidden></div>
+  <div class="hud" id="hud">
+    <div class="hud-date" id="hudDate">19 Jun 2026</div>
+    <div class="hud-layer" id="hudLayer">Flood map</div>
+  </div>
+  <div class="legend" id="legend" aria-live="polite"></div>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+</div>
+
+<!-- ========================== story (scrolls over the map) ========================== -->
+<main class="story" id="story">
+
+  <section class="hero step" id="top" data-layer="flood" data-date="2026-06-19" data-mode="play" data-loop="true" data-view="full">
+    <div class="hero-inner">
+      <p class="kicker">NASA Space Apps 2026 · Dancing with SARs</p>
+      <h1>The Invisible Flood</h1>
+      <p class="lede">Every year, Cambodia's great lake breathes in, swelling deep into a forest that is <em>meant</em> to flood. Clouds and leaves hide it from view. A new radar satellite, <b>NISAR</b>, lets us watch it happen.</p>
+      <div class="stats">
+        <div class="stat"><span class="big water">+72%</span><span>open water,<br>June → October</span></div>
+        <div class="stat"><span class="big forest">8×</span><span>more flooded forest<br>by late August</span></div>
+        <div class="stat"><span class="big">11</span><span>radar images,<br>through every cloud</span></div>
+      </div>
+      <a class="scroll-cue" href="#ch1">Scroll to begin <span aria-hidden="true">↓</span></a>
+      <a class="skip" href="#explore">or jump to the interactive map</a>
+    </div>
+  </section>
+
+  <!-- 1 -->
+  <section class="step" id="ch1" data-layer="flood" data-date="2026-06-19" data-view="full">
+    <div class="card">
+      <p class="eyebrow">Chapter 1</p>
+      <h2>A lake that breathes</h2>
+      <p>Tonle Sap is Southeast Asia's largest freshwater lake. In the dry season it is a shallow pool of about 2,500–3,000 km². Then the monsoon arrives, the Mekong River rises, and something remarkable happens: <b>the river that drains the lake turns around</b> and pushes water back into it.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 600 230" role="img" aria-label="Diagram: in the dry season the small lake drains into the Mekong; in the rainy season the Tonle Sap River reverses and the Mekong fills the lake, which grows about five times and floods the forest.">
+          <defs>
+            <marker id="arw" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ffd166"/></marker>
+          </defs>
+          <!-- dry -->
+          <g>
+            <text x="150" y="22" class="d-title">Dry season · Nov–May</text>
+            <path d="M262 40 C 250 90, 268 140, 255 215" class="d-mekong" style="stroke-width:10"/>
+            <text x="244" y="52" class="d-label">Mekong</text>
+            <g class="d-forest"><circle cx="58" cy="92" r="6"/><circle cx="80" cy="76" r="6"/><circle cx="112" cy="70" r="6"/><circle cx="146" cy="76" r="6"/><circle cx="168" cy="96" r="6"/><circle cx="160" cy="130" r="6"/><circle cx="128" cy="146" r="6"/><circle cx="90" cy="146" r="6"/><circle cx="60" cy="126" r="6"/></g>
+            <ellipse cx="112" cy="110" rx="38" ry="20" class="d-lake"/>
+            <path d="M146 118 C 185 135, 215 150, 256 160" class="d-river"/>
+            <path d="M170 130 L 232 156" class="d-flow" marker-end="url(#arw)"/>
+            <text x="112" y="114" class="d-lakelabel">lake</text>
+            <text x="140" y="205" class="d-note">Lake drains <tspan class="d-hi">out</tspan></text>
+          </g>
+          <!-- wet -->
+          <g transform="translate(300,0)">
+            <text x="150" y="22" class="d-title">Rainy season · Jun–Oct</text>
+            <path d="M262 40 C 250 90, 268 140, 255 215" class="d-mekong" style="stroke-width:18"/>
+            <text x="244" y="52" class="d-label">Mekong</text>
+            <ellipse cx="112" cy="110" rx="92" ry="52" class="d-lake"/>
+            <g class="d-forest d-flooded"><circle cx="58" cy="92" r="6"/><circle cx="80" cy="76" r="6"/><circle cx="112" cy="70" r="6"/><circle cx="146" cy="76" r="6"/><circle cx="168" cy="96" r="6"/><circle cx="160" cy="130" r="6"/><circle cx="128" cy="146" r="6"/><circle cx="90" cy="146" r="6"/><circle cx="60" cy="126" r="6"/></g>
+            <path d="M190 128 C 215 140, 232 150, 256 160" class="d-river"/>
+            <path d="M246 158 L 204 138" class="d-flow" marker-end="url(#arw)"/>
+            <text x="112" y="114" class="d-lakelabel">lake ×5</text>
+            <text x="140" y="205" class="d-note">River <tspan class="d-hi">reverses</tspan>, lake fills</text>
+          </g>
+        </svg>
+      </figure>
+      <p>The lake grows to as much as <b>13,000 km², about five times its dry-season size</b>, and from about 3.6 m to more than 10 m deep. Nowhere else in the world does a river reverse on this scale.</p>
+      <p class="sources">Sources: Mekong River Commission, <i>Flood Report</i> (2005); Ji et al., <i>Hydrology and Earth System Sciences</i> (2022).</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="step" id="ch2" data-layer="flood" data-date="2026-08-30" data-view="103.76,13.27,11.4">
+    <div class="card">
+      <p class="eyebrow">Chapter 2</p>
+      <h2>A flood that gives life</h2>
+      <p>Here, the flood is not a disaster. <b>It is the lake's heartbeat.</b> The trees of the flooded forest stand in water for months every year, and they are built for it. When the water rises around their trunks, fish swim in to spawn and feed among the branches, leaves and fruit.</p>
+      <div class="pull"><span class="pull-big">Bigger flood&nbsp;=&nbsp;more&nbsp;fish</span><span>The size of the yearly flood pulse is directly linked to how many fish the lake produces.</span></div>
+      <p>This underwater nursery feeds one of the world's largest inland fisheries: a catch of about <b>600,000 tonnes a year</b>. On the map, the bright green band is flooded forest along the north shore on 30 August.</p>
+      <p class="sources">Sources: National Geographic (fish biologist Zeb Hogan, 2020); Stimson Center Mekong Dam Monitor.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="step" id="ch3" data-layer="flood" data-date="2026-06-19" data-view="full">
+    <div class="card">
+      <p class="eyebrow">Chapter 3</p>
+      <h2>The real danger: a weaker heartbeat</h2>
+      <p>The threat to Tonle Sap is not too much flood. It is <b>too little</b>.</p>
+      <div class="threats">
+        <div class="threat"><span class="t-big">−56%</span><span>water flowing back into the lake each year, 2010s vs 1960s</span></div>
+        <div class="threat"><span class="t-big">−31%</span><span>flooded forest lost since 1993</span></div>
+        <div class="threat"><span class="t-big">2026</span><span>an El Niño year, with rainfall shortages already hitting rice farms</span></div>
+      </div>
+      <p>In 2019 and 2020 the river reversed late, after low rains and with dams upstream holding water back. Fishing families felt it at once.</p>
+      <p>So the question that matters is simple: <b>how far does the flood reach into the forest each year, and when?</b> That is exactly what is hard to see.</p>
+      <p class="sources">Sources: Ji et al., <i>HESS</i> (2022); Lohani et al., <i>Water</i> (via National Geographic); Mekong River Commission (2020); WMO El Niño update, Sept 2026.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="step" id="ch4" data-layer="grey" data-date="2026-08-30" data-view="full">
+    <div class="card card-wide">
+      <p class="eyebrow">Chapter 4</p>
+      <h2>Why the flood is invisible</h2>
+      <p>The flood peaks in the monsoon, when clouds cover the sky. And even on a clear day, a camera in space sees only <b>treetops</b>: the water is underneath. Here is the same 40 × 40 km area at the end of August, seen three ways.</p>
+      <div class="triptych">
+        <figure><img src="data/cmp_s2.jpg" alt="Satellite photo, half covered by white cloud; the forest looks uniformly green." loading="lazy"><figcaption><b>Photo</b> (Sentinel-2, 27 Aug)<br>Half cloud. Under the leaves: nothing.</figcaption></figure>
+        <figure><img src="data/cmp_s1.png" alt="Sentinel-1 radar image; the flooded forest band is only faintly brighter." loading="lazy"><figcaption><b>Short-wave radar</b> (Sentinel-1, 30 Aug)<br>Flooded forest: faint.</figcaption></figure>
+        <figure><img src="data/cmp_nisar.png" alt="NISAR radar image; the flooded forest band along the shore glows bright." loading="lazy"><figcaption><b>NISAR</b> (30 Aug)<br>Flooded forest: clear, ~3× stronger.</figcaption></figure>
+      </div>
+      <p>NISAR's radar waves are about <b>24 cm long</b>, the length of a school ruler. They slip between the leaves and reach the water below. Shorter waves mostly bounce off the leaves.</p>
+      <details class="tech"><summary>Technical details</summary>
+        <p>Sentinel-2 L2A 27 Aug 2026: 52% cloud inside our area (30 Aug: 100%). Flooded-forest ring vs other trees on 30 Aug: NISAR L-band HH +2.3 dB; Sentinel-1 C-band VV +0.8 dB (VH +1.0 dB). The ring was chosen from NISAR's 18 Aug image so 30 Aug noise cannot favour NISAR. Sentinel-1 covers 74% of the area that day (blank strip on the left). Radar panels: same grey scale, −22 to +2 dB.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="step" id="ch5" data-layer="grey" data-mode="compare" data-left="2026-06-19" data-right="2026-08-30" data-date="2026-08-30" data-view="103.82,13.25,11.1">
+    <div class="card">
+      <p class="eyebrow">Chapter 5</p>
+      <h2>How radar sees water under trees</h2>
+      <p>NISAR doesn't take photos. It sends its own microwave pulses, day or night, through cloud, and measures how much bounces back.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 600 250" role="img" aria-label="Diagram of three cases. Calm open water reflects the radar away like a mirror, so it looks dark. In flooded forest the radar bounces off the water, then off a trunk, straight back to the satellite, so it looks very bright. In dry forest the leaves scatter the radar in all directions, so it looks medium grey.">
+          <defs>
+            <marker id="arr2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ffd166"/></marker>
+            <marker id="arr3" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a93a3"/></marker>
+          </defs>
+          <!-- panel 1: open water -->
+          <g>
+            <g class="sat" transform="translate(18,14)"><rect x="8" y="6" width="14" height="10" rx="2"/><rect x="-8" y="8" width="14" height="6"/><rect x="24" y="8" width="14" height="6"/></g>
+            <rect x="0" y="168" width="190" height="34" class="d-water"/>
+            <path d="M34 34 L 95 168" class="ray" marker-end="url(#arr2)"/>
+            <path d="M95 168 L 160 40" class="ray ray-away" marker-end="url(#arr3)"/>
+            <text x="95" y="224" class="r-head">Open water</text>
+            <text x="95" y="247" class="r-res dark">DARK</text>
+          </g>
+          <!-- panel 2: flooded forest -->
+          <g transform="translate(205,0)">
+            <g class="sat" transform="translate(18,14)"><rect x="8" y="6" width="14" height="10" rx="2"/><rect x="-8" y="8" width="14" height="6"/><rect x="24" y="8" width="14" height="6"/></g>
+            <rect x="0" y="168" width="190" height="34" class="d-water"/>
+            <g class="tree"><rect x="124" y="104" width="9" height="66"/><ellipse cx="128" cy="96" rx="30" ry="20"/></g>
+            <g class="tree"><rect x="58" y="112" width="8" height="58"/><ellipse cx="62" cy="104" rx="24" ry="17"/></g>
+            <path d="M34 34 L 104 168" class="ray" marker-end="url(#arr2)"/>
+            <path d="M104 168 L 123 140" class="ray"/>
+            <path d="M123 140 L 40 38" class="ray ray-back" marker-end="url(#arr2)"/>
+            <text x="95" y="224" class="r-head">Flooded forest</text>
+            <text x="95" y="247" class="r-res bright">VERY BRIGHT</text>
+          </g>
+          <!-- panel 3: dry forest -->
+          <g transform="translate(410,0)">
+            <g class="sat" transform="translate(18,14)"><rect x="8" y="6" width="14" height="10" rx="2"/><rect x="-8" y="8" width="14" height="6"/><rect x="24" y="8" width="14" height="6"/></g>
+            <rect x="0" y="168" width="190" height="34" class="d-ground"/>
+            <g class="tree"><rect x="96" y="104" width="9" height="66"/><ellipse cx="100" cy="96" rx="32" ry="22"/></g>
+            <path d="M34 34 L 88 88" class="ray" marker-end="url(#arr2)"/>
+            <path d="M92 90 L 60 70" class="ray ray-weak" marker-end="url(#arr3)"/>
+            <path d="M94 92 L 130 62" class="ray ray-weak" marker-end="url(#arr3)"/>
+            <path d="M94 94 L 140 110" class="ray ray-weak" marker-end="url(#arr3)"/>
+            <path d="M90 90 L 52 52" class="ray ray-weak" marker-end="url(#arr2)"/>
+            <text x="95" y="224" class="r-head">Dry forest</text>
+            <text x="95" y="247" class="r-res mid">MEDIUM</text>
+          </g>
+        </svg>
+      </figure>
+      <p>Calm water acts like a mirror and sends the pulse away, so it looks <b>dark</b>. Under trees, the pulse hits the water, then a trunk, and comes straight back: a “double bounce” that looks <b>very bright</b>. Dry leaves scatter it in all directions: <b>medium</b>.</p>
+      <p>Drag the divider on the map: <b>June</b> on the left, <b>late August</b> on the right. The forest along the shore lights up as water arrives beneath it.</p>
+      <details class="tech"><summary>Technical details</summary>
+        <p>The bright return is “double bounce”, strongest in HH polarization (sent and received horizontally). In tree cells, HH minus HV rose from 4.9 dB (June) to 7.7 dB (late September), which points to water under trees rather than more leaves. Open water = HH below −15 dB; flooded forest = tree cells with HH at or above −5 dB (broad) or −3 dB (strict); 100 m cells; tree cells = ESA WorldCover 2021 tree class covering ≥ 50% of the cell.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="step" id="ch6" data-layer="timecolor" data-view="full">
+    <div class="card">
+      <p class="eyebrow">Chapter 6</p>
+      <h2>One picture, three moments</h2>
+      <p>We can paint time into a single radar image. Each colour channel is a different date: <b class="c-r">red = 30 Aug</b>, <b class="c-g">green = 19 Jun</b>, <b class="c-b">blue = 17 Oct</b>. A place gets the colour of the date(s) when it was brightest.</p>
+      <ul class="key">
+        <li><span class="sw" style="background:#e6a6d6"></span><span><b>Pink:</b> forest that <em>lit up</em> in Aug–Oct. That's the hidden flood beneath the trees.</span></li>
+        <li><span class="sw" style="background:#b5b04a"></span><span><b>Olive:</b> bright in June and August, then under open water by October.</span></li>
+        <li><span class="sw" style="background:#22c33a"></span><span><b>Green:</b> bright in June, then swallowed by open water by August.</span></li>
+        <li><span class="sw" style="background:#7a1f12"></span><span><b>Dark red:</b> rice fields, bright only in late August.</span></li>
+        <li><span class="sw" style="background:#000;border:1px solid #555"></span><span><b>Black:</b> the lake, dark on every date.</span></li>
+        <li><span class="sw" style="background:#f2f2f2"></span><span><b>White:</b> the town of Siem Reap, bright on every date.</span></li>
+      </ul>
+      <details class="tech"><summary>Technical details</summary>
+        <p>NISAR HH, 100 m, each channel stretched from −16 to −1 dB: R = 2026-08-30, G = 2026-06-19, B = 2026-10-17. A standard multi-temporal radar composite.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="step" id="ch7" data-layer="flood" data-date="2026-06-19" data-mode="play" data-loop="true" data-view="full">
+    <div class="card">
+      <p class="eyebrow">Chapter 7</p>
+      <h2>Watch the lake breathe</h2>
+      <p>Eleven NISAR images, one every 12 days. Watch the map:</p>
+      <div class="counters">
+        <div class="counter water"><span class="c-num" data-counter="open_water_km2">0</span><span class="c-unit">km²</span><span class="c-lab">open water</span></div>
+        <div class="counter forest"><span class="c-num" data-counter="flooded_forest_m5dB_km2">0</span><span class="c-unit">km²</span><span class="c-lab">flooded forest</span></div>
+        <div class="counter"><span class="c-num c-date" id="counterDate">19 Jun</span><span class="c-lab">image date</span></div>
+      </div>
+      <ol class="timeline">
+        <li><b>June–July.</b> Quiet: little water under the trees.</li>
+        <li><b>Late August.</b> Water spreads beneath the forest. Flooded forest grows about 8×, to roughly 310 km².</li>
+        <li><b>September–October.</b> The water rises over low trees and shrubs and into the rice fields, which turn blue like open water. Open water reaches about 1,050 km².</li>
+      </ol>
+      <p class="note">A satellite instrument gap left no images between 26 July and 17 August.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="step" id="ch8" data-layer="flood" data-date="2026-10-17" data-view="103.64,13.17,10.7">
+    <div class="card">
+      <p class="eyebrow">Chapter 8</p>
+      <h2>The hidden flood comes first</h2>
+      <p>Put both curves on the same scale, each as a share of its own peak, and a pattern appears:</p>
+      <div class="chart-card"><canvas id="chartPeaks" role="img" aria-label="Chart: flooded forest peaks on 30 August, open water peaks on 17 October, about seven weeks later."></canvas></div>
+      <p>The water first spreads <b>under</b> the canopy (bright green). Then it rises <b>over</b> the low trees and shrubs, which disappear beneath the surface and turn blue on the map. So the hidden flood shrinks while the open flood keeps growing.</p>
+      <div class="hypothesis"><b>Our hypothesis:</b> the hidden flood under the trees peaks about <b>5–7 weeks before</b> the open-water flood. A camera, and even short-wave radar, would miss the first half of the story.</div>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="step" id="ch9" data-layer="duration" data-view="full">
+    <div class="card">
+      <p class="eyebrow">Chapter 9</p>
+      <h2>How long was it under water?</h2>
+      <p>For each 100 m square we counted how many of the ten 12-day images showed it flooded, as open water or flooded forest. Darker means <b>wet for longer</b>: the core of the fish nursery.</p>
+      <div class="stats stats-sm">
+        <div class="stat"><span class="big water">964</span><span>km² of land under water at some point, on top of 570 km² of permanent lake</span></div>
+        <div class="stat"><span class="big forest">84%</span><span>of the forest in our area (452 of 540 km²) flooded at least once</span></div>
+      </div>
+      <p>Maps like this, made every year, would show whether the nursery is shrinking. That is exactly the kind of change the 31% forest loss and the weakening flood pulse warn about.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="step" id="ch10" data-layer="flood" data-date="2026-08-30" data-view="full">
+    <div class="card">
+      <p class="eyebrow">Chapter 10</p>
+      <h2>Who can use this</h2>
+      <div class="users">
+        <div class="user"><span class="u-ico" aria-hidden="true">🐟</span><div><b>Fisheries managers</b><span>How much flooded forest (fish nursery) was available, and for how long.</span></div></div>
+        <div class="user"><span class="u-ico" aria-hidden="true">🌳</span><div><b>Forest &amp; wetland protection</b><span>Which parts of the forest actually flood, so protection goes where it matters.</span></div></div>
+        <div class="user"><span class="u-ico" aria-hidden="true">🌾</span><div><b>Farmers &amp; disaster agencies</b><span>When the water reaches the rice fields, even under cloud.</span></div></div>
+        <div class="user"><span class="u-ico" aria-hidden="true">🎓</span><div><b>Teachers &amp; the public</b><span>Watch a lake breathe, through the clouds.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="step" id="ch11" data-layer="flood" data-date="2026-10-17" data-view="full">
+    <div class="card">
+      <p class="eyebrow">Chapter 11</p>
+      <h2>What we can't see (yet)</h2>
+      <ul class="caveats">
+        <li><b>A short record.</b> NISAR's images here start in June 2026, so we can't yet compare with past years.</li>
+        <li><b>A gap.</b> A satellite instrument gap hides late July to mid-August, just as the flood takes off.</li>
+        <li><b>Untested cut-offs.</b> Our water and flooded-forest thresholds are standard values, not checked on the ground. Very dense forest can hide some flooding even from NISAR.</li>
+        <li><b>Map labels.</b> The land-cover map (2021) calls some low shrubland “forest”. Part of the forest that “vanishes” in October is shrubland fully under water.</li>
+        <li><b>One puzzle.</b> A small bump on 1 July that we can't explain yet.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="step" id="ch12" data-layer="flood" data-date="2026-10-29" data-view="full">
+    <div class="card">
+      <p class="eyebrow">Chapter 12</p>
+      <h2>What's next for NISAR</h2>
+      <p>NISAR images every spot on Earth every 12 days (more often, combining its passes), and the data are <b>free</b>. With the same simple method we could:</p>
+      <ul class="next">
+        <li>track the flood pulse <b>every year</b> and see the draining in the next images;</li>
+        <li><b>compare years</b> as the record grows, and flag years when the forest floods less than usual;</li>
+        <li>apply it to other flooded forests: the <b>Amazon</b>, the <b>Congo basin</b>, Southeast Asia's <b>peat swamps</b>.</li>
+      </ul>
+      <p class="kicker-end">The lake breathes every year. Now we can watch.</p>
+    </div>
+  </section>
+
+  <!-- explore -->
+  <section class="step explore" id="explore" data-mode="explore" data-layer="flood" data-date="2026-08-30" data-view="full">
+    <div class="card card-explore">
+      <h2>Explore the data</h2>
+      <p class="explore-intro">The map is yours. Use the controls at the bottom of the screen. <b>Click any spot</b> inside the image to see how it changed on every date.</p>
+      <div class="ex-charts">
+        <div class="ex-chart"><h3>Open water (km²)</h3><div class="cw"><canvas id="chartWater"></canvas></div></div>
+        <div class="ex-chart"><h3>Flooded forest (km²)</h3><div class="cw"><canvas id="chartForest"></canvas></div></div>
+      </div>
+      <p class="note">Shaded: instrument gap, no images. Hollow point: 29 Oct, a newer processing version. Click a point to jump to that date.</p>
+      <p><a class="btn-dl" href="data/series.csv" download>⬇ Download the numbers (series.csv)</a> <a class="btn-dl ghost" href="data/classes.csv" download>⬇ Flood-map areas (classes.csv)</a></p>
+      <details class="tech"><summary>Technical details</summary>
+        <p>NISAR L2 GCOV, track 083 ascending, frame 008, 20 m pixels averaged to 100 m in linear power. Jun 19 – Oct 17: provisional products (CRID P05023); Oct 29: validated product, newer processing version (P05036). Click values are read from the grey radar images (−22 to +2 dB, ±0.05 dB). Radar colour layer: red = HH, green = HV, blue = HH÷HV, fixed stretch for all dates.</p>
+      </details>
+      <hr>
+      <h3 class="about-h">About</h3>
+      <p><b>Team:</b> [TEAM NAME] · [MEMBERS]</p>
+      <p class="small"><b>Data:</b> NISAR L2 GCOV (NASA/ISRO) via NASA Earthdata / ASF DAAC · Sentinel-1 RTC and Sentinel-2 L2A (ESA Copernicus) via Microsoft Planetary Computer · ESA WorldCover 2021 · basemap © OpenStreetMap contributors.</p>
+      <p class="small">Open source (MIT): <a id="repo-link" href="#">code on GitHub</a> · <a id="process-link" href="#">how we did it (methods)</a> · <a href="#top" class="back-top">↑ back to the story</a></p>
+    </div>
+  </section>
+</main>
+
+<!-- ========================== explore dock ========================== -->
+<div class="dock" id="dock" hidden>
+  <button id="play" class="d-btn" aria-label="Play">▶</button>
+  <div class="d-date">
+    <input id="slider" type="range" min="0" max="10" step="1" value="0" aria-label="Date">
+    <span id="sliderLabel">19 Jun 2026</span>
+  </div>
+  <div class="d-layers" role="group" aria-label="Map layer">
+    <button class="d-seg" data-layer="flood" aria-pressed="true">Flood map</button>
+    <button class="d-seg" data-layer="radar" aria-pressed="false">Radar colour</button>
+    <button class="d-seg" data-layer="grey" aria-pressed="false">Radar grey</button>
+  </div>
+  <label class="d-op" title="See-through"><span aria-hidden="true">◐</span><input id="opacity" type="range" min="0" max="1" step="0.05" value="0.9" aria-label="Layer opacity"></label>
+  <button id="compareBtn" class="d-btn d-text" aria-pressed="false">Swipe</button>
+  <div class="d-cmp" id="cmpSelects" hidden>
+    <select id="selL" aria-label="Left date"></select><span>vs</span><select id="selR" aria-label="Right date"></select>
+  </div>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
